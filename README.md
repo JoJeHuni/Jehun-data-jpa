@@ -47,20 +47,105 @@
 ```yaml
 spring:
   datasource:
-  url: jdbc:h2:tcp://localhost/~/datajpa
-  username: sa
-  password:
-  driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/jehundatajpa
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
   jpa:
     hibernate:
       ddl-auto: create
     properties:
       hibernate:
-#       show_sql: true
-      format_sql: true
-
+        # show_sql: true
+        format_sql: true
 logging.level:
   org.hibernate.SQL: debug
 # org.hibernate.type: trace
+```
+
+실제 동작하는지 확인하기  
+**Member 엔티티**
+```java
+package study.jehundatajpa;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter @Setter
+public class Member {
+
+    // (strategy = GenerationType.IDENTITY) 는 H2 버전이 달라서 추가했다.
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    private String username;
+}
+```
+
+**MemberJpaRepository**
+```java
+package study.jehundatajpa;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class MemberJpaRepository {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public Long save(Member member) {
+        em.persist(member);
+        return member.getId();
+    }
+
+    public Member find(Long id) {
+        return em.find(Member.class, id);
+    }
+}
+```
+
+**JPA 기반 테스트 (아직 진행 중)**
+```java
+package study.jehundatajpa;
+
+import jakarta.transaction.Transactional;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+
+@SpringBootTest
+@Transactional
+@Rollback(false)
+public class MemberJpaRepositoryTest {
+
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
+    
+    @Test
+    @Transactional
+    public void testMember() throws Exception {
+        //given
+        Member member = new Member();
+        member.setUsername("memberA");
+
+        //when
+        Long savedId = memberJpaRepository.save(member);
+        Member findMember = memberJpaRepository.find(savedId);
+
+        //then
+        Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
+        Assertions.assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
+
+    }
+}
 ```
