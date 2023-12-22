@@ -183,5 +183,5 @@ dependencies {
 ```
 
 실행하면 로그가 이런 형태로 남는다.
-![img.png](src/image/section1/img.png)
+![img.png](image/section1/img.png)
 
