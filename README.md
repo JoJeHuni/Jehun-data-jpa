@@ -67,30 +67,26 @@ logging.level:
 실제 동작하는지 확인하기  
 **Member 엔티티**
 ```java
-package study.jehundatajpa;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
-
 @Entity
 @Getter @Setter
 public class Member {
-
-    // (strategy = GenerationType.IDENTITY) 는 H2 버전이 달라서 추가했다.
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    
+    @Id @GeneratedValue
+    private Long id;
     private String username;
+    
+    protected Member() {
+        
+    }
+    
+    public Member(String username) {
+        this.username = username;
+    }
 }
 ```
 
 **MemberJpaRepository**
 ```java
-package study.jehundatajpa;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -101,9 +97,9 @@ public class MemberJpaRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public Long save(Member member) {
+    public Member save(Member member) {
         em.persist(member);
-        return member.getId();
+        return member;
     }
 
     public Member find(Long id) {
@@ -112,10 +108,18 @@ public class MemberJpaRepository {
 }
 ```
 
+**스프링 데이터 JPA 리포지토리**  
+```java
+import org.springframework.data.jpa.repository.JpaRepository;
+import study.jehundatajpa.entity.Member;
+
+public interface MemberRepository extends JpaRepository<Member, Long> {
+}
+
+```
+
 **JPA 기반 테스트**
 ```java
-package study.jehundatajpa;
-
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -134,12 +138,11 @@ public class MemberJpaRepositoryTest {
     @Test
     public void testMember() throws Exception {
         //given
-        Member member = new Member();
-        member.setUsername("memberA");
+        Member member = new Member("memberA");
 
         //when
-        Long savedId = memberJpaRepository.save(member);
-        Member findMember = memberJpaRepository.find(savedId);
+        Long savedMember = memberJpaRepository.save(member);
+        Member findMember = memberJpaRepository.find(savedMember.getId());
 
         //then
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());

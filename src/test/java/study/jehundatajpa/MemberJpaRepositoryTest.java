@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import study.jehundatajpa.entity.Member;
+import study.jehundatajpa.repository.MemberJpaRepository;
 
 @SpringBootTest
 @Transactional
@@ -18,12 +20,11 @@ public class MemberJpaRepositoryTest {
     @Test
     public void testMember() throws Exception {
         //given
-        Member member = new Member();
-        member.setUsername("memberA");
+        Member member = new Member("memberA");
 
         //when
-        Long savedId = memberJpaRepository.save(member);
-        Member findMember = memberJpaRepository.find(savedId);
+        Member savedMember = memberJpaRepository.save(member);
+        Member findMember = memberJpaRepository.find(savedMember.getId());
 
         //then
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());

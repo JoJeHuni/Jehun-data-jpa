@@ -1,4 +1,4 @@
-package study.jehundatajpa;
+package study.jehundatajpa.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,8 +1,9 @@
-package study.jehundatajpa;
+package study.jehundatajpa.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import study.jehundatajpa.entity.Member;
 
 @Repository
 public class MemberJpaRepository {
@@ -10,9 +11,9 @@ public class MemberJpaRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public Long save(Member member) {
+    public Member save(Member member) {
         em.persist(member);
-        return member.getId();
+        return member;
     }
 
     public Member find(Long id) {
