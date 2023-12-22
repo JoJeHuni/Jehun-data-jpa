@@ -112,7 +112,7 @@ public class MemberJpaRepository {
 }
 ```
 
-**JPA 기반 테스트 (아직 진행 중)**
+**JPA 기반 테스트**
 ```java
 package study.jehundatajpa;
 
@@ -125,14 +125,13 @@ import org.springframework.test.annotation.Rollback;
 
 @SpringBootTest
 @Transactional
-@Rollback(false)
+@Rollback(false) //테스트 할 때 @Transactional은 자동으로 롤백을 하는데 이 어노테이션으로 바꿀 수 있다.
 public class MemberJpaRepositoryTest {
 
     @Autowired
     MemberJpaRepository memberJpaRepository;
     
     @Test
-    @Transactional
     public void testMember() throws Exception {
         //given
         Member member = new Member();
@@ -146,6 +145,43 @@ public class MemberJpaRepositoryTest {
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
         Assertions.assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
 
+        // findmember와 그냥 member는 같은 것이다. -> JPA 엔티티는 동일성이 보장된다.
+        Assertions.assertThat(findMember).isEqualTo(member);
+        // System.out.println("findMember == member: ") + (findMember ==member));
     }
 }
 ```
+
+**쿼리 파라미터 로그 남기기 (개발할 때 편하다)**
+- 로그에 다음을 추가하기 `org.hibernate.type` : SQL 실행 파라미터를 로그로 남긴다.
+- application.yml 에 `org.hibernate.SQL: debug` 아래에 `org.hibernate.type: trace` 추가해서 볼 수 있긴 하다.
+- 하지만 외부 라이브러리로 추천하는 것이 있다.
+
+https://github.com/gavlyukovskiy/spring-boot-data-source-decorator  
+위의 링크에서 로그를 원하는 형태로 수정해서 application.yml에 넣어 사용할 수 있다.
+
+```
+implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+```
+> 참고: 쿼리 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로,  
+> 개발 단계에서는 편하게 사용해도 된다.  
+> 하지만 운영시스템에 적용하려면 꼭 성능테스트를 하고 사용하는 것이 좋다.
+> + 스프링 부트 3.0 이상은 라이브러리 버전을 1.9.0 이상을 사용해야 한다.
+
+build.gradle 에 추가
+```
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+```
+
+실행하면 로그가 이런 형태로 남는다.
+![img.png](src/image/section1/img.png)
+
