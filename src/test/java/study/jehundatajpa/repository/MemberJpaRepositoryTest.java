@@ -1,4 +1,4 @@
-package study.jehundatajpa;
+package study.jehundatajpa.repository;
 
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import study.jehundatajpa.entity.Member;
-import study.jehundatajpa.repository.MemberJpaRepository;
 
 @SpringBootTest
 @Transactional
