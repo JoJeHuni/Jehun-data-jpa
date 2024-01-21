@@ -15,7 +15,8 @@ public class Member {
     private String username;
     private int age;
 
-    @ManyToOne //일대다 관계
+    //일대다 관계
+    @ManyToOne(fetch = FetchType.LAZY) // JPA에서 모든 연관관계는 기본적으로 다 지연로딩으로 세팅해야 한다.
     @JoinColumn(name = "team_id")
     private Team team;
 

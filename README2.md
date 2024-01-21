@@ -31,7 +31,8 @@ public class Member {
     private String username;
     private int age;
 
-    @ManyToOne //일대다 관계
+    //일대다 관계
+    @ManyToOne(fetch = FetchType.LAZY) // JPA에서 모든 연관관계는 기본적으로 다 지연로딩으로 세팅해야 한다.
     @JoinColumn(name = "team_id")
     private Team team;
 
@@ -143,4 +144,18 @@ public class MemberTest {
 - db 테이블 결과 확인 
 - 지연 로딩 동작 확인
 
-![img.png](image/section2/img_2.png)
+![img.png](image/section2/img_2.png)  
+![img.png](image/section2/img_3.png)  
+
+위의 사진은 지연로딩이 아닌 즉시로딩으로 되어 있어서 바로 뜬다.  
+Member 에서 Team과 ManyToOne 으로 되어있는 부분을 fetch로 지연로딩하게끔 바꿔줬다.  
+```java
+    //일대다 관계
+    @ManyToOne(fetch = FetchType.LAZY) // JPA에서 모든 연관관계는 기본적으로 다 지연로딩으로 세팅해야 한다.
+    @JoinColumn(name = "team_id")
+    private Team team;
+```
+
+**실행 시**  
+![img.png](image/section2/img_4.png)  
+이런 식으로 member1 부터 쿼리가 지연로딩되는 것을 알 수 있다.
