@@ -142,3 +142,5 @@ public class MemberTest {
 - 가급적 순수 JPA로 동작 확인 (뒤에서 변경)
 - db 테이블 결과 확인 
 - 지연 로딩 동작 확인
+
+![img.png](image/section2/img_2.png)

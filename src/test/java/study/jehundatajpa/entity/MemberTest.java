@@ -35,7 +35,7 @@ public class MemberTest {
         em.persist(member4);
 
         //초기화
-        em.flush();
+        em.flush(); // DB의 Insert 쿼리를 다 날려버린다.
         em.clear();
 
         //확인
