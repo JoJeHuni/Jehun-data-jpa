@@ -191,3 +191,90 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 > 참고: 실무에서는 메소드 이름으로 쿼리 생성 기능은 파라미터가 증가하면 메서드 이름이 매우 지저분해진다.  
 > 따라서 `@Query` 기능을 자주 사용하게 된다.
+
+---
+## @Query, 값, DTO 조회하기
+실무에서도 사용하는 내용이다.  
+
+**단순히 값 하나를 조회 (MemberRepository에 추가)**
+```java
+    @Query("select m.username from Member m")
+    List<String> findUsernameList();
+```
+
+**테스트 추가 ( `findUsernameList()` )**
+```java
+    @Test
+    public void findUsernameList() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<String> usernameList = memberRepository.findUsernameList();
+        for (String s : usernameList) {
+            System.out.println("s = " + s); // 원래 테스트는 assertThat을 이용해서 해야 한다.
+        }
+    }
+```
+
+**테스트 결과**  
+![img.png](image/section4/img_1.png)  
+
+JPA 값 타입( `@Embedded` )도 이 방식으로 조회할 수 있다.  
+
+
+**DTO로 직접 조회**
+```java
+    @Query("select new study.jehundatajpa.dto.MemberDto(m.id, m.username, t.name) " +
+        " from Member m join m.team t")
+    List<MemberDto> findMemberDto();
+```
+
+**테스트 추가 ( `findMemberDto` )**
+```java
+@Test
+    public void findMemberDto() {
+        Team team = new Team("teamA");
+        teamRepository.save(team);
+
+        Member m1 = new Member("AAA", 10);
+        m1.setTeam(team);
+        memberRepository.save(m1);
+
+        List<MemberDto> memberDto = memberRepository.findMemberDto();
+        for (MemberDto dto : memberDto) {
+            System.out.println("dto = " + dto);
+        }
+    }
+```
+
+**테스트 결과**  
+![img_1.png](image/section4/img_2.png)  
+
+주의! DTO로 직접 조회 하려면 JPA의 `new` 명령어를 사용해야 한다.  
+그리고 다음과 같이 생성자가 맞는 DTO가 필요하다. (JPA와 사용방식이 동일하다.)
+
+추가) **MemberDto**
+```java
+package study.jehundatajpa.dto;
+
+import lombok.Data;
+
+@Data
+public class MemberDto {
+
+  private Long id;
+  private String username;
+  private String teamName;
+
+  public MemberDto(Long id, String username, String teamName) {
+    this.id = id;
+    this.username = username;
+    this.teamName = teamName;
+  }
+}
+```
+
+---
