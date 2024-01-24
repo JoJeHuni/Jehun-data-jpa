@@ -108,7 +108,7 @@ JpaRepository 에서 했던 것과 마찬가지로 결과가 나온다.
 ---
 
 ## JPA NamedQuery
-(거의 실무에서 쓸 일은 없다.)  
+(거의 실무에서 쓸 일은 없다.)   
 JPA의 NamedQuery를 호출할 수 있음  
 
 `NamedQuery` 어노테이션으로 Named 쿼리 정의
@@ -142,7 +142,7 @@ public class MemberRepository {
 List<Member> findByUsername(@Param("username") String username);
 ```
 
-`@Query` 를 생략하고 메서드 이름만으로 Named 쿼리를 호출할 수 있다.
+`@Query` 를 생략하고 메서드 이름만으로 Named 쿼리를 호출할 수 있다.  
 
 스프링 데이터 JPA로 Named 쿼리 호출**
 ```java
@@ -158,3 +158,36 @@ public interface MemberRepository extends JpaRepository<Member, Long> { //** 여
 > 참고: 스프링 데이터 JPA를 사용하면 실무에서 Named Query를 직접 등록해서 사용하는 일은 드물다. 대신 `@Query` 를 사용해서 리파지토리 메소드에 쿼리를 직접 정의한다.
 
 ---
+## @Query, 리포지토리 메소드에 쿼리 정의하기
+
+위에 본 네임드 쿼리의 장점을 가지고 있으면서 리포지토리에 쿼리를 넣을 수 있는 기능에 대해 알아보자.  
+
+**메서드에 JPQL 쿼리 작성**
+```java
+public interface MemberRepository extends JpaRepository<Member, Long> {
+  @Query("select m from Member m where m.username= :username and m.age = :age")
+  List<Member> findUser(@Param("username") String username, @Param("age") int age);
+}
+```
+
+- `@org.springframework.data.jpa.repository.Query` 어노테이션을 사용
+- 실행할 메서드에 정적 쿼리를 직접 작성하므로 이름 없는 Named 쿼리라 할 수 있음
+- JPA Named 쿼리처럼 쿼리에서 오타가 있다면 애플리케이션 실행 시점에 문법 오류를 발견할 수 있음 -> Property 오류가 뜬다. (매우 큰 장점!)
+
+**MemberRepositoryTest 에 테스트 추가**
+```java
+    @Test
+    public void testQuery() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findUser("AAA", 10);
+        assertThat(result.get(0)).isEqualTo(m1);
+    }
+```
+
+> 참고: 실무에서는 메소드 이름으로 쿼리 생성 기능은 파라미터가 증가하면 메서드 이름이 매우 지저분해진다.  
+> 따라서 `@Query` 기능을 자주 사용하게 된다.
